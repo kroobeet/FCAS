@@ -1210,6 +1210,40 @@ class FranchiseApp(QMainWindow):
         self.delete_device_btn.setEnabled(False)
         self.add_device_btn.setEnabled(True)
 
+    # ===== История устройств =====
+    def setup_device_history_tab(self):
+        """Настройка вкладки истории устройств"""
+        layout = QVBoxLayout()
+        self.device_history_tab.setLayout(layout)
+
+        # Фильтры
+        filter_layout = QHBoxLayout()
+        layout.addLayout(filter_layout)
+
+        self.history_device = QComboBox()
+        filter_layout.addWidget(QLabel("Устройство:"))
+        filter_layout.addWidget(self.history_device)
+
+        self.history_status = QComboBox()
+        self.history_status.addItem("Все статусы", None)
+        self.history_status.addItems(["active", "in_repair", "decommissioned", "lost"])
+        filter_layout.addWidget(QLabel("Статус:"))
+        filter_layout.addWidget(self.history_status)
+
+        filter_btn = QPushButton("Применить фильтры")
+        filter_btn.clicked.connect(self.load_device_history)
+        filter_layout.addWidget(filter_btn)
+
+        # Таблица с историей
+        self.history_table = QTableWidget()
+        self.history_table.setColumnCount(6)
+        self.history_table.setHorizontalHeaderLabels(
+            ["ID", "Дата", "Устройство", "Франшиза", "Локация", "Статус"]
+        )
+        self.history_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.history_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        layout.addWidget(self.history_table)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

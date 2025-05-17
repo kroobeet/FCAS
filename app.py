@@ -86,14 +86,14 @@ class FranchiseApp(QMainWindow):
     def connect_to_db(self):
         """Установка соединения с PostgreSQL"""
         try:
-            logging.info("Попытка подключения к БД")
+            self.logger.info("Попытка подключения к БД")
             conn = psycopg2.connect(
                 dbname="fcas",
                 user="postgres",
                 password="postgres",
                 host="localhost"
             )
-            logging.info("Подключение к БД успешно выполнено")
+            self.logger.info("Подключение к БД успешно выполнено")
             return conn
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка подключения", f"Не удалось подключиться к БД:\n{str(e)}")

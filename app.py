@@ -728,6 +728,22 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке типов устройств:\n{str(e)}")
 
+    def device_type_table_click(self, row, column):
+        """Обработка клика по таблице типов устройств"""
+        device_type_id = int(self.device_type_table.item(row, 0).text())
+        name = self.device_type_table.item(row, 1).text()
+        description = self.device_type_table.item(row, 2).text()
+
+        # Заполняем форму
+        self.current_device_type_id = device_type_id
+        self.device_type_name.setText(name)
+        self.device_type_description.setText(description if description else "")
+
+        # Активируем кнопки
+        self.update_device_type_btn.setEnabled(True)
+        self.delete_device_type_btn.setEnabled(True)
+        self.add_device_type_btn.setEnabled(False)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

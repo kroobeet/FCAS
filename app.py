@@ -308,3 +308,44 @@ class FranchiseApp(QMainWindow):
         self.update_franchise_btn.setEnabled(True)
         self.delete_franchise_btn.setEnabled(True)
         self.add_franchise_btn.setEnabled(False)
+
+    def location_table_click(self, row, column):
+        """Обработка клика по таблице локаций"""
+        location_id = int(self.location_table.item(row, 0).text())
+        franchise_name = self.location_table.item(row, 1).text()
+        location_name = self.location_table.item(row, 2).text()
+        address = self.location_table.item(row, 3).text()
+        active = self.location_table.item(row, 4).text() == "True"
+
+        # Заполняем форму
+        self.current_location_id = location_id
+
+        # Устанавливаем франшизу
+        franchise_index = 0
+        for i in range(self.location_franchise.count()):
+            if self.location_franchise.itemText(i) == franchise_name:
+                franchise_index = i
+                break
+        self.location_franchise.setCurrentIndex(franchise_index)
+
+        self.location_name.setText(location_name)
+        self.location_address.setText(address if address else "")
+        self.location_active.setChecked(active)
+
+        # Получаем номер помещения из БД
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                SELECT room_number
+                FROM location
+                WHERE location_id = %s
+            """, (location_id,))
+                room_number, = cursor.fetchone()[0]
+                self.location_room.setText(room_number if room_number else "")
+        except psycopg2.Error as e:
+            QMessageBox(self, "Ошибка", f"Ошибка при загрузке данных локации:\n{str(e)}")
+
+        # Активируем кнопки
+        self.update_location_btn.setEnabled(True)
+        self.delete_location_btn.setEnabled(True)
+        self.add_location_btn.setEnabled(False)

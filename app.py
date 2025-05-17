@@ -195,6 +195,7 @@ class FranchiseApp(QMainWindow):
                 for franchise_id, name in cursor.fetchall():
                     self.franchise_parent.addItem(name, franchise_id)
                     self.location_franchise.addItem(name, franchise_id)
+                    self.device_franchise.addItem(name, franchise_id)
 
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке франшиз:\n{str(e)}")

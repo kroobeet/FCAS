@@ -480,6 +480,13 @@ class FranchiseApp(QMainWindow):
                         item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
                         self.location_table.setItem(row_num, col_num, item)
 
+                # Обновляем комбобокс для устройств
+                self.device_location.clear()
+                self.device_location.addItem("Не указана", None)
+                cursor.execute("SELECT location_id, name FROM location ORDER BY name")
+                for location_id, name in cursor.fetchall():
+                    self.device_location.addItem(name, location_id)
+
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке локаций:\n{str(e)}")
 

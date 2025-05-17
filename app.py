@@ -492,3 +492,38 @@ class FranchiseApp(QMainWindow):
         self.update_franchise_btn.setEnabled(False)
         self.delete_franchise_btn.setEnabled(False)
         self.add_franchise_btn.setEnabled(True)
+
+    def add_location(self):
+        """Добавление новой локации"""
+        franchise_id = self.location_franchise.currentData()
+        if not franchise_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать франшизу!")
+            return
+
+        name = self.location_name.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Название локации обязательно!")
+            return
+
+        address = self.location_address.text().strip()
+        room_number = self.location_room.text().strip()
+        is_active = self.location_active.isChecked()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO location (franchise_id, name, address, room_number, is_active)
+                    VALUES (%s, %s, %s, %s, %s)
+                    RETURNING location_id
+                """, (franchise_id, name, address if address else None,
+                      room_number if room_number else None, is_active))
+                location_id = cursor.fetchone()[0]
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", f"Локация успешно добавлена с ID: {location_id}")
+                self.load_locations()
+                self.clear_location_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении локации:\n{str(e)}")

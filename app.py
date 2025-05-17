@@ -854,6 +854,103 @@ class FranchiseApp(QMainWindow):
         self.delete_device_type_btn.setEnabled(False)
         self.add_device_type_btn.setEnabled(True)
 
+    # ===== Устройства =====
+    def setup_device_tab(self):
+        """Настройка вкладки устройств"""
+        layout = QVBoxLayout()
+        self.device_tab.setLayout(layout)
+
+        # Форма для добавления/редактирования
+        form_layout = QHBoxLayout()
+        layout.addLayout(form_layout)
+
+        # Левая часть формы
+        left_form = QVBoxLayout()
+        form_layout.addLayout(left_form)
+
+        self.device_type = QComboBox()
+        left_form.addWidget(QLabel("Тип устройства:"))
+        left_form.addWidget(self.device_type)
+
+        self.device_franchise = QComboBox()
+        left_form.addWidget(QLabel("Франшиза:"))
+        left_form.addWidget(self.device_franchise)
+
+        self.device_location = QComboBox()
+        left_form.addWidget(QLabel("Локация:"))
+        left_form.addWidget(self.device_location)
+
+        self.device_inventory = QLineEdit()
+        left_form.addWidget(QLabel("Инвентарный номер:"))
+        left_form.addWidget(self.device_inventory)
+
+        self.device_name = QLineEdit()
+        left_form.addWidget(QLabel("Название:"))
+        left_form.addWidget(self.device_name)
+
+        # Правая часть формы
+        right_form = QVBoxLayout()
+        form_layout.addLayout(right_form)
+
+        self.device_status = QComboBox()
+        self.device_status.addItems(["active", "in_repair", "decommissioned", "lost"])
+        right_form.addWidget(QLabel("Статус:"))
+        right_form.addWidget(self.device_status)
+
+        self.device_purchase_date = QDateEdit()
+        self.device_purchase_date.setCalendarPopup(True)
+        self.device_purchase_date.setDate(QDate.currentDate())
+        right_form.addWidget(QLabel("Дата покупки:"))
+        right_form.addWidget(self.device_purchase_date)
+
+        self.device_warranty = QDateEdit()
+        self.device_warranty.setCalendarPopup(True)
+        self.device_warranty.setDate(QDate.currentDate().addYears(1))
+        right_form.addWidget(QLabel("Дата окончания гарантии:"))
+        right_form.addWidget(self.device_warranty)
+
+        self.device_price = QLineEdit()
+        self.device_price.setValidator(QDoubleValidator(0, 9999999, 2))
+        right_form.addWidget(QLabel("Цена покупки:"))
+        right_form.addWidget(self.device_price)
+
+        self.device_notes = QLineEdit()
+        right_form.addWidget(QLabel("Примечания:"))
+        right_form.addWidget(self.device_notes)
+
+        # Кнопки управления
+        buttons_layout = QHBoxLayout()
+        layout.addLayout(buttons_layout)
+
+        self.add_device_btn = QPushButton("Добавить")
+        self.add_device_btn.clicked.connect(self.add_device)
+        buttons_layout.addWidget(self.add_device_btn)
+
+        self.update_device_btn = QPushButton("Обновить")
+        self.update_device_btn.setEnabled(False)
+        self.update_device_btn.clicked.connect(self.update_device)
+        buttons_layout.addWidget(self.update_device_btn)
+
+        self.delete_device_btn = QPushButton("Удалить")
+        self.delete_device_btn.setEnabled(False)
+        self.delete_device_btn.clicked.connect(self.delete_device)
+        buttons_layout.addWidget(self.delete_device_btn)
+
+        self.clear_device_btn = QPushButton("Очистить")
+        self.clear_device_btn.clicked.connect(self.clear_device_form)
+        buttons_layout.addWidget(self.clear_device_btn)
+
+        # Таблица с устройствами
+        self.device_table = QTableWidget()
+        self.device_table.setColumnCount(8)
+        self.device_table.setHorizontalHeaderLabels(
+            ["ID", "Тип", "Франшиза", "Локация", "Инв.№", "Название", "Статус", "Цена"]
+        )
+        self.device_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.device_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.device_table.cellClicked.connect(self.device_table_click)
+        layout.addWidget(self.device_table)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

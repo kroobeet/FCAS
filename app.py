@@ -1446,6 +1446,48 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке компонентов:\n{str(e)}")
 
+    def component_table_click(self, row, column):
+        """Обработка клика по таблице компонентов"""
+        component_id = int(self.component_table.item(row, 0).text())
+        device_name = self.component_table.item(row, 1).text()
+        component_type = self.component_table.item(row, 2).text()
+        model = self.component_table.item(row, 3).text()
+        installed_date = self.component_table.item(row, 4).text()
+        notes = self.component_table.item(row, 5).text()
+
+        # Заполняем форму
+        self.current_component_id = component_id
+
+        # Устанавливаем устройство
+        device_index = 0
+        for i in range(self.component_selected_device.count()):
+            if self.component_selected_device.itemText(i) == device_name:
+                device_index = i
+                break
+        self.component_selected_device.setCurrentIndex(device_index)
+
+        # Устанавливаем тип компонента
+        type_index = 0
+        for i in range(self.component_selected_type.count()):
+            if self.component_selected_type.itemText(i) == component_type:
+                type_index = i
+                break
+        self.component_selected_type.setCurrentIndex(type_index)
+
+        self.component_model.setText(model if model else "")
+
+        if installed_date:
+            self.component_installed_date.setDate(QDate.fromString(installed_date, "yyyy-MM-dd"))
+        else:
+            self.component_installed_date.setDate(QDate.currentDate())
+
+        self.component_notes.setText(notes if notes else "")
+
+        # Активируем кнопки
+        self.update_component_btn.setEnabled(True)
+        self.delete_component_btn.setEnabled(True)
+        self.add_component_btn.setEnabled(False)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

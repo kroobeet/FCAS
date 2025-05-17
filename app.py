@@ -744,6 +744,33 @@ class FranchiseApp(QMainWindow):
         self.delete_device_type_btn.setEnabled(True)
         self.add_device_type_btn.setEnabled(False)
 
+    def add_device_type(self):
+        """Добавление нового типа устройства"""
+        name = self.device_type_name.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Название типа обязательно!")
+            return
+
+        description = self.device_type_description.text().strip()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO device_type (name, description)
+                    VALUES (%s, %s)
+                    RETURNING device_type_id
+                """, (name, description if description else None))
+                device_type_id = cursor.fetchone()[0]
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", f"Тип устройства успешно добавлен с ID: {device_type_id}")
+                self.load_device_types()
+                self.clear_device_type_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении типа устройства:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

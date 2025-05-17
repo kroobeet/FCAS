@@ -1569,6 +1569,34 @@ class FranchiseApp(QMainWindow):
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении компонента:\n{str(e)}")
 
+    def delete_component(self):
+        """Удаление компонента"""
+        if not hasattr(self, 'current_component_id'):
+            return
+
+        reply = QMessageBox.question(
+            self, 'Подтверждение',
+            'Вы уверены, что хотите удалить этот компонент?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                with self.db_connection.cursor() as cursor:
+                    cursor.execute("""
+                        DELETE FROM component 
+                        WHERE component_id = %s
+                    """, (self.current_component_id,))
+                    self.db_connection.commit()
+
+                    QMessageBox.information(self, "Успех", "Компонент успешно удален")
+                    self.load_components()
+                    self.clear_component_form()
+
+            except psycopg2.Error as e:
+                self.db_connection.rollback()
+                QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении компонента:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

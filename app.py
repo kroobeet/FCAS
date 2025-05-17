@@ -1162,6 +1162,34 @@ class FranchiseApp(QMainWindow):
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении устройства:\n{str(e)}")
 
+    def delete_device(self):
+        """Удаление устройства"""
+        if not hasattr(self, 'current_device_id'):
+            return
+
+        reply = QMessageBox.question(
+            self, 'Подтверждение',
+            'Вы уверены, что хотите удалить это устройство?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                with self.db_connection.cursor() as cursor:
+                    cursor.execute("""
+                        DELETE FROM device 
+                        WHERE device_id = %s
+                    """, (self.current_device_id,))
+                    self.db_connection.commit()
+
+                    QMessageBox.information(self, "Успех", "Устройство успешно удалено")
+                    self.load_devices()
+                    self.clear_device_form()
+
+            except psycopg2.Error as e:
+                self.db_connection.rollback()
+                QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении устройства:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

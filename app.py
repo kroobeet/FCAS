@@ -981,6 +981,78 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке устройств:\n{str(e)}")
 
+    def device_table_click(self, row, column):
+        """Обработка клика по таблице устройств"""
+        device_id = int(self.device_table.item(row, 0).text())
+        device_type = self.device_table.item(row, 1).text()
+        franchise_name = self.device_table.item(row, 2).text()
+        location_name = self.device_table.item(row, 3).text()
+        inventory_number = self.device_table.item(row, 4).text()
+        name = self.device_table.item(row, 5).text()
+        status = self.device_table.item(row, 6).text()
+        price = self.device_table.item(row, 7).text()
+
+        # Заполняем форму
+        self.current_device_id = device_id
+
+        # Устанавливаем тип устройства
+        type_index = 0
+        for i in range(self.device_type.count()):
+            if self.device_type.itemText(i) == device_type:
+                type_index = i
+                break
+        self.device_type.setCurrentIndex(type_index)
+
+        # Устанавливаем франшизу
+        franchise_index = 0
+        for i in range(self.device_franchise.count()):
+            if self.device_franchise.itemText(i) == franchise_name:
+                franchise_index = i
+                break
+        self.device_franchise.setCurrentIndex(franchise_index)
+
+        # Устанавливаем локацию
+        location_index = 0  # По умолчанию "Не указана"
+        if location_name:
+            for i in range(1, self.device_location.count()):
+                if self.device_location.itemText(i) == location_name:
+                    location_index = i
+                    break
+        self.device_location.setCurrentIndex(location_index)
+
+        self.device_inventory.setText(inventory_number)
+        self.device_name.setText(name)
+        self.device_status.setCurrentText(status)
+
+        if price:
+            self.device_price.setText(str(price))
+        else:
+            self.device_price.clear()
+
+        # Получаем остальные данные из БД
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT purchase_date, warranty_expiry, notes
+                    FROM device
+                    WHERE device_id = %s
+                """, (device_id,))
+                purchase_date, warranty_expiry, notes = cursor.fetchone()
+
+                if purchase_date:
+                    self.device_purchase_date.setDate(QDate.fromString(purchase_date, "yyyy-MM-dd"))
+                if warranty_expiry:
+                    self.device_warranty.setDate(QDate.fromString(warranty_expiry, "yyyy-MM-dd"))
+                self.device_notes.setText(notes if notes else "")
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке данных устройства:\n{str(e)}")
+
+        # Активируем кнопки
+        self.update_device_btn.setEnabled(True)
+        self.delete_device_btn.setEnabled(True)
+        self.add_device_btn.setEnabled(False)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

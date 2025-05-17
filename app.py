@@ -342,6 +342,7 @@ class FranchiseApp(QMainWindow):
             """, (location_id,))
                 room_number, = cursor.fetchone()[0]
                 self.location_room.setText(room_number if room_number else "")
+
         except psycopg2.Error as e:
             QMessageBox(self, "Ошибка", f"Ошибка при загрузке данных локации:\n{str(e)}")
 

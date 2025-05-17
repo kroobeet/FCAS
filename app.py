@@ -39,6 +39,26 @@ class FranchiseApp(QMainWindow):
         self.tabs.addTab(self.location_tab, "Локации")
         self.setup_location_tab()
 
+        # Вкладка для типов устройств
+        self.device_type_tab = QWidget()
+        self.tabs.addTab(self.device_type_tab, "Типы устройств")
+        self.setup_device_type_tab()
+
+        # Вкладка для устройств
+        self.device_tab = QWidget()
+        self.tabs.addTab(self.device_tab, "Оборудование")
+        self.setup_device_tab()
+
+        # Вкладка для истории устройств
+        self.device_history_tab = QWidget()
+        self.tabs.addTab(self.device_history_tab, "История оборудования")
+        self.setup_device_history_tab()
+
+        # Вкладка для компонентов
+        self.component_tab = QWidget()
+        self.tabs.addTab(self.component_tab, "Компоненты")
+        self.setup_component_tab()
+
         # Загружаем начальные данные
         self.load_franchises()
         self.load_locations()

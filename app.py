@@ -800,6 +800,48 @@ class FranchiseApp(QMainWindow):
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении типа устройства:\n{str(e)}")
 
+    def delete_device_type(self):
+        """Удаление типа устройства"""
+        if not hasattr(self, 'current_device_type_id'):
+            return
+
+        reply = QMessageBox.question(
+            self, 'Подтверждение',
+            'Вы уверены, что хотите удалить этот тип устройства?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                with self.db_connection.cursor() as cursor:
+                    # Проверяем, есть ли связанные устройства
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM device 
+                        WHERE device_type_id = %s
+                    """, (self.current_device_type_id,))
+                    device_count = cursor.fetchone()[0]
+
+                    if device_count > 0:
+                        QMessageBox.warning(
+                            self, "Ошибка",
+                            "Нельзя удалить тип устройства, у которого есть устройства!"
+                        )
+                        return
+
+                    cursor.execute("""
+                        DELETE FROM device_type 
+                        WHERE device_type_id = %s
+                    """, (self.current_device_type_id,))
+                    self.db_connection.commit()
+
+                    QMessageBox.information(self, "Успех", "Тип устройства успешно удален")
+                    self.load_device_types()
+                    self.clear_device_type_form()
+
+            except psycopg2.Error as e:
+                self.db_connection.rollback()
+                QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении типа устройства:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

@@ -11,8 +11,8 @@ from PyQt6.QtCore import Qt
 class FranchiseApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("FCAS")
-        self.setGeometry(100, 100, 800, 600)
+        self.setWindowTitle("FCAS - Franchise Control and Administration System")
+        self.setGeometry(100, 100, 1000, 800)
 
         # Подключение к БД
         self.db_connection = self.connect_to_db()

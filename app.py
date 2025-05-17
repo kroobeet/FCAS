@@ -614,3 +614,9 @@ class FranchiseApp(QMainWindow):
         """Обработка закрытия окна"""
         self.db_connection.close()
         event.accept()
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = FranchiseApp()
+    window.show()
+    sys.exit(app.exec())

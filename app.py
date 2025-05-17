@@ -3,7 +3,7 @@ import psycopg2
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
-    QTabWidget, QMessageBox, QComboBox, QCheckBox
+    QTabWidget, QMessageBox, QComboBox, QCheckBox, QGroupBox, QDateEdit
 )
 from PyQt6.QtCore import Qt, QDate
 from PyQt6.QtGui import QDoubleValidator

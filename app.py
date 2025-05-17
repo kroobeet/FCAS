@@ -1,5 +1,6 @@
 import sys
 import psycopg2
+import logging
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem,
@@ -12,6 +13,11 @@ from PyQt6.QtGui import QDoubleValidator
 class FranchiseApp(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        # Настройка логирования
+        self.setup_logging()
+
+        logging.info("Инициализация приложения FCAS")
         self.setWindowTitle("FCAS - Franchise Control and Administration System")
         self.setGeometry(100, 100, 1000, 800)
 
@@ -62,6 +68,20 @@ class FranchiseApp(QMainWindow):
 
         # Загружаем начальные данные
         self.load_initial_data()
+
+        logging.info("Приложение успешно инициализировано")
+
+    def setup_logging(self):
+        """Настройка системы логирования"""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('fcas.log'),
+                logging.StreamHandler()
+            ]
+        )
+        self.logger = logging.getLogger(__name__)
 
     def connect_to_db(self):
         """Установка соединения с PostgreSQL"""

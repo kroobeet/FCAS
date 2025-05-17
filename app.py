@@ -189,6 +189,7 @@ class FranchiseApp(QMainWindow):
 
         self.clear_location_btn = QPushButton("Очистить")
         self.clear_location_btn.clicked.connect(self.clear_location_form)
+        buttons_layout.addWidget(self.clear_location_btn)
 
         # Таблица с локациями
         self.location_table = QTableWidget()
@@ -206,9 +207,9 @@ class FranchiseApp(QMainWindow):
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT f.franchise_id, f.name, p.name as parent_name,
+                    SELECT f.franchise_id, f.name, p.name as parent_name, 
                            f.contact_phone, f.is_active
-                    FROM franchise f 
+                    FROM franchise f
                     LEFT JOIN franchise p ON f.parent_id = p.franchise_id
                     ORDER BY f.franchise_id
                 """)
@@ -243,12 +244,12 @@ class FranchiseApp(QMainWindow):
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("""
-                SELECT l.location_id, f.name as franchise_name,
-                       l.name, l.address, l.is_active
-                FROM location l
-                JOIN franchise f ON l.franchise_id = f.franchise_id
-                ORDER BY l.location_id
-            """)
+                    SELECT l.location_id, f.name as franchise_name, 
+                           l.name, l.address, l.is_active
+                    FROM location l
+                    JOIN franchise f ON l.franchise_id = f.franchise_id
+                    ORDER BY l.location_id
+                """)
                 locations = cursor.fetchall()
 
                 # Очищаем таблицу
@@ -278,13 +279,12 @@ class FranchiseApp(QMainWindow):
         self.franchise_name.setText(franchise_name)
 
         # Устанавливаем родительскую франшизу
-        parent_index = 0 # По умолчанию "Нет родительской"
+        parent_index = 0  # По умолчанию "Нет родительской"
         if parent_name:
             for i in range(1, self.franchise_parent.count()):
                 if self.franchise_parent.itemText(i) == parent_name:
                     parent_index = i
                     break
-
         self.franchise_parent.setCurrentIndex(parent_index)
 
         self.franchise_phone.setText(phone)
@@ -294,15 +294,16 @@ class FranchiseApp(QMainWindow):
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("""
-                SELECT address, email
-                FROM franchise
-                WHERE franchise_id = %s
-            """, (franchise_id,))
+                    SELECT address, email
+                    FROM franchise
+                    WHERE franchise_id = %s
+                """, (franchise_id,))
                 address, email = cursor.fetchone()
                 self.franchise_address.setText(address if address else "")
                 self.franchise_email.setText(email if email else "")
+
         except psycopg2.Error as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке франшизы:\n{str(e)}")
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке данных франшизы:\n{str(e)}")
 
         # Активируем кнопки
         self.update_franchise_btn.setEnabled(True)
@@ -336,15 +337,15 @@ class FranchiseApp(QMainWindow):
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("""
-                SELECT room_number
-                FROM location
-                WHERE location_id = %s
-            """, (location_id,))
-                room_number, = cursor.fetchone()[0]
+                    SELECT room_number
+                    FROM location
+                    WHERE location_id = %s
+                """, (location_id,))
+                room_number = cursor.fetchone()[0]
                 self.location_room.setText(room_number if room_number else "")
 
         except psycopg2.Error as e:
-            QMessageBox(self, "Ошибка", f"Ошибка при загрузке данных локации:\n{str(e)}")
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке данных локации:\n{str(e)}")
 
         # Активируем кнопки
         self.update_location_btn.setEnabled(True)
@@ -367,11 +368,11 @@ class FranchiseApp(QMainWindow):
         try:
             with self.db_connection.cursor() as cursor:
                 cursor.execute("""
-                INSERT INTO franchise (parent_id, name, address, contact_phone, email, is_active)
-                VALUES (%s, %s, %s, %s, %s)
-                RETURNING franchise_id
+                    INSERT INTO franchise (parent_id, name, address, contact_phone, email, is_active)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING franchise_id
                 """, (parent_id, name, address if address else None,
-                           phone if phone else None, email if email else None, is_active))
+                      phone if phone else None, email if email else None, is_active))
                 franchise_id = cursor.fetchone()[0]
                 self.db_connection.commit()
 
@@ -614,6 +615,7 @@ class FranchiseApp(QMainWindow):
         """Обработка закрытия окна"""
         self.db_connection.close()
         event.accept()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

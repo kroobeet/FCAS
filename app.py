@@ -1053,6 +1053,59 @@ class FranchiseApp(QMainWindow):
         self.delete_device_btn.setEnabled(True)
         self.add_device_btn.setEnabled(False)
 
+    def add_device(self):
+        """Добавление нового устройства"""
+        device_type_id = self.device_type.currentData()
+        if not device_type_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать тип устройства!")
+            return
+
+        franchise_id = self.device_franchise.currentData()
+        if not franchise_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать франшизу!")
+            return
+
+        inventory_number = self.device_inventory.text().strip()
+        if not inventory_number:
+            QMessageBox.warning(self, "Ошибка", "Инвентарный номер обязателен!")
+            return
+
+        name = self.device_name.text().strip()
+        status = self.device_status.currentText()
+        purchase_date = self.device_purchase_date.date().toString("yyyy-MM-dd")
+        warranty_expiry = self.device_warranty.date().toString("yyyy-MM-dd")
+        price = self.device_price.text().strip()
+        notes = self.device_notes.text().strip()
+        location_id = self.device_location.currentData()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO device (
+                        device_type_id, franchise_id, location_id,
+                        inventory_number, name, status, purchase_date,
+                        warranty_expiry, purchase_price, notes
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING device_id
+                """, (
+                    device_type_id, franchise_id, location_id,
+                    inventory_number, name if name else None, status,
+                    purchase_date, warranty_expiry,
+                    float(price) if price else None,
+                    notes if notes else None
+                ))
+                device_id = cursor.fetchone()[0]
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", f"Устройство успешно добавлено с ID: {device_id}")
+                self.load_devices()
+                self.clear_device_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении устройства:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

@@ -594,3 +594,18 @@ class FranchiseApp(QMainWindow):
             except psycopg2.Error as e:
                 self.db_connection.rollback()
                 QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении локации:\n{str(e)}")
+
+    def clear_location_form(self):
+        """Очистка формы локации"""
+        self.location_franchise.setCurrentIndex(0)
+        self.location_name.clear()
+        self.location_address.clear()
+        self.location_room.clear()
+        self.location_active.setChecked(True)
+
+        if hasattr(self, 'current_location_id'):
+            del self.current_location_id
+
+        self.update_location_btn.setEnabled(False)
+        self.delete_location_btn.setEnabled(False)
+        self.add_location_btn.setEnabled(True)

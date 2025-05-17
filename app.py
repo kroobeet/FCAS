@@ -1380,6 +1380,25 @@ class FranchiseApp(QMainWindow):
         self.component_table.cellClicked.connect(self.component_table_click)
         layout.addWidget(self.component_table)
 
+    def load_component_types(self):
+        """Загрузка списка типов компонентов из БД"""
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("SELECT component_type_id, name FROM component_type ORDER BY name")
+                component_types = cursor.fetchall()
+
+                # Обновляем комбобоксы
+                self.component_type.clear()
+                self.component_type.addItem("Все типы", None)
+                self.component_selected_type.clear()
+
+                for component_type_id, name in cursor.fetchall():
+                    self.component_type.addItem(name, component_type_id)
+                    self.component_selected_type.addItem(name, component_type_id)
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке типов компонентов:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

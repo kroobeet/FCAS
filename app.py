@@ -1244,6 +1244,53 @@ class FranchiseApp(QMainWindow):
         self.history_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         layout.addWidget(self.history_table)
 
+    def load_device_history(self):
+        """Загрузка истории устройств из БД"""
+        device_id = self.history_device.currentData()
+        status = self.history_status.currentData()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                query = """
+                    SELECT h.history_id, h.changed_at, d.name as device_name,
+                           f.name as franchise_name, l.name as location_name, h.status
+                    FROM device_history h
+                    JOIN device d ON h.device_id = d.device_id
+                    LEFT JOIN franchise f ON h.franchise_id = f.franchise_id
+                    LEFT JOIN location l ON h.location_id = l.location_id
+                """
+                params = []
+
+                where_clauses = []
+                if device_id:
+                    where_clauses.append("h.device_id = %s")
+                    params.append(device_id)
+                if status:
+                    where_clauses.append("h.status = %s")
+                    params.append(status)
+
+                if where_clauses:
+                    query += " WHERE " + " AND ".join(where_clauses)
+
+                query += " ORDER BY h.changed_at DESC"
+
+                cursor.execute(query, params)
+                history = cursor.fetchall()
+
+                # Очищаем таблицу
+                self.history_table.setRowCount(0)
+
+                # Заполняем таблицу
+                for row_num, row_data in enumerate(history):
+                    self.history_table.insertRow(row_num)
+                    for col_num, data in enumerate(row_data):
+                        item = QTableWidgetItem(str(data) if data is not None else "")
+                        item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                        self.history_table.setItem(row_num, col_num, item)
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке истории устройств:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

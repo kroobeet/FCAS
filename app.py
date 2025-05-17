@@ -476,3 +476,19 @@ class FranchiseApp(QMainWindow):
             except psycopg2.Error as e:
                 self.db_connection.rollback()
                 QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении франшизы:\n{str(e)}")
+
+    def clear_franchise_form(self):
+        """Очистка формы франшизы"""
+        self.franchise_name.clear()
+        self.franchise_parent.setCurrentIndex(0)
+        self.franchise_address.clear()
+        self.franchise_phone.clear()
+        self.franchise_email.clear()
+        self.franchise_active.setChecked(True)
+
+        if hasattr(self, 'current_franchise_id'):
+            del self.current_franchise_id
+
+        self.update_franchise_btn.setEnabled(False)
+        self.delete_franchise_btn.setEnabled(False)
+        self.add_franchise_btn.setEnabled(True)

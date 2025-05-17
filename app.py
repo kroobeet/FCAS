@@ -650,6 +650,57 @@ class FranchiseApp(QMainWindow):
         self.delete_location_btn.setEnabled(False)
         self.add_location_btn.setEnabled(True)
 
+    # ===== Типы устройств =====
+    def setup_device_type_tab(self):
+        """Настройка вкладки типов устройств"""
+        layout = QVBoxLayout()
+        self.device_type_tab.setLayout(layout)
+
+        # Форма для добавления/редактирования
+        form_layout = QVBoxLayout()
+        layout.addLayout(form_layout)
+
+        self.device_type_name = QLineEdit()
+        form_layout.addWidget(QLabel("Название типа:"))
+        form_layout.addWidget(self.device_type_name)
+
+        self.device_type_description = QLineEdit()
+        form_layout.addWidget(QLabel("Описание:"))
+        form_layout.addWidget(self.device_type_description)
+
+        # Кнопки управления
+        buttons_layout = QHBoxLayout()
+        layout.addLayout(buttons_layout)
+
+        self.add_device_type_btn = QPushButton("Добавить")
+        self.add_device_type_btn.clicked.connect(self.add_device_type)
+        buttons_layout.addWidget(self.add_device_type_btn)
+
+        self.update_device_type_btn = QPushButton("Обновить")
+        self.update_device_type_btn.setEnabled(False)
+        self.update_device_type_btn.clicked.connect(self.update_device_type)
+        buttons_layout.addWidget(self.update_device_type_btn)
+
+        self.delete_device_type_btn = QPushButton("Удалить")
+        self.delete_device_type_btn.setEnabled(False)
+        self.delete_device_type_btn.clicked.connect(self.delete_device_type)
+        buttons_layout.addWidget(self.delete_device_type_btn)
+
+        self.clear_device_type_btn = QPushButton("Очистить")
+        self.clear_device_type_btn.clicked.connect(self.clear_device_type_form)
+        buttons_layout.addWidget(self.clear_device_type_btn)
+
+        # Таблица с типами устройств
+        self.device_type_table = QTableWidget()
+        self.device_type_table.setColumnCount(3)
+        self.device_type_table.setHorizontalHeaderLabels(
+            ["ID", "Название", "Описание"]
+        )
+        self.device_type_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.device_type_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.device_type_table.cellClicked.connect(self.device_type_table_click)
+        layout.addWidget(self.device_type_table)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

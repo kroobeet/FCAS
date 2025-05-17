@@ -609,3 +609,8 @@ class FranchiseApp(QMainWindow):
         self.update_location_btn.setEnabled(False)
         self.delete_location_btn.setEnabled(False)
         self.add_location_btn.setEnabled(True)
+
+    def closeEvent(self, event):
+        """Обработка закрытия окна"""
+        self.db_connection.close()
+        event.accept()

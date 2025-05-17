@@ -701,6 +701,33 @@ class FranchiseApp(QMainWindow):
         self.device_type_table.cellClicked.connect(self.device_type_table_click)
         layout.addWidget(self.device_type_table)
 
+    def load_device_types(self):
+        """Загрузка списка типов устройств из БД"""
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("SELECT device_type_id, name, description FROM device_type ORDER BY name")
+                device_types = cursor.fetchall()
+
+                # Очищаем таблицу
+                self.device_type_table.setRowCount(0)
+
+                # Заполняем таблицу
+                for row_num, row_data in enumerate(device_types):
+                    self.device_type_table.insertRow(row_num)
+                    for col_num, data in enumerate(row_data):
+                        item = QTableWidgetItem(str(data) if data is not None else "")
+                        item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                        self.device_type_table.setItem(row_num, col_num, item)
+
+                # Обновляем комбобокс для устройств
+                self.device_type.clear()
+                cursor.execute("SELECT device_type_id, name FROM device_type ORDER BY name")
+                for device_type_id, name in cursor.fetchall():
+                    self.device_type.addItem(name, device_type_id)
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке типов устройств:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

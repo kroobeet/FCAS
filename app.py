@@ -1291,6 +1291,95 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке истории устройств:\n{str(e)}")
 
+    # ===== Компоненты =====
+    def setup_component_tab(self):
+        """Настройка вкладки компонентов"""
+        layout = QVBoxLayout()
+        self.component_tab.setLayout(layout)
+
+        # Фильтры
+        filter_layout = QHBoxLayout()
+        layout.addLayout(filter_layout)
+
+        self.component_device = QComboBox()
+        filter_layout.addWidget(QLabel("Устройство:"))
+        filter_layout.addWidget(self.component_device)
+
+        self.component_type = QComboBox()
+        filter_layout.addWidget(QLabel("Тип компонента:"))
+        filter_layout.addWidget(self.component_type)
+
+        filter_btn = QPushButton("Применить фильтры")
+        filter_btn.clicked.connect(self.load_components)
+        filter_layout.addWidget(filter_btn)
+
+        # Форма для добавления/редактирования
+        form_layout = QHBoxLayout()
+        layout.addLayout(form_layout)
+
+        # Левая часть формы
+        left_form = QVBoxLayout()
+        form_layout.addLayout(left_form)
+
+        self.component_selected_device = QComboBox()
+        left_form.addWidget(QLabel("Устройство:"))
+        left_form.addWidget(self.component_selected_device)
+
+        self.component_selected_type = QComboBox()
+        left_form.addWidget(QLabel("Тип компонента:"))
+        left_form.addWidget(self.component_selected_type)
+
+        self.component_model = QLineEdit()
+        left_form.addWidget(QLabel("Модель:"))
+        left_form.addWidget(self.component_model)
+
+        # Правая часть формы
+        right_form = QVBoxLayout()
+        form_layout.addLayout(right_form)
+
+        self.component_installed_date = QDateEdit()
+        self.component_installed_date.setCalendarPopup(True)
+        self.component_installed_date.setDate(QDate.currentDate())
+        right_form.addWidget(QLabel("Дата установки:"))
+        right_form.addWidget(self.component_installed_date)
+
+        self.component_notes = QLineEdit()
+        right_form.addWidget(QLabel("Примечания:"))
+        right_form.addWidget(self.component_notes)
+
+        # Кнопки управления
+        buttons_layout = QHBoxLayout()
+        layout.addLayout(buttons_layout)
+
+        self.add_component_btn = QPushButton("Добавить")
+        self.add_component_btn.clicked.connect(self.add_component)
+        buttons_layout.addWidget(self.add_component_btn)
+
+        self.update_component_btn = QPushButton("Обновить")
+        self.update_component_btn.setEnabled(False)
+        self.update_component_btn.clicked.connect(self.update_component)
+        buttons_layout.addWidget(self.update_component_btn)
+
+        self.delete_component_btn = QPushButton("Удалить")
+        self.delete_component_btn.setEnabled(False)
+        self.delete_component_btn.clicked.connect(self.delete_component)
+        buttons_layout.addWidget(self.delete_component_btn)
+
+        self.clear_component_btn = QPushButton("Очистить")
+        self.clear_component_btn.clicked.connect(self.clear_component_form)
+        buttons_layout.addWidget(self.clear_component_btn)
+
+        # Таблица с компонентами
+        self.component_table = QTableWidget()
+        self.component_table.setColumnCount(6)
+        self.component_table.setHorizontalHeaderLabels(
+            ["ID", "Устройство", "Тип", "Модель", "Дата установки", "Примечания"]
+        )
+        self.component_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.component_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.component_table.cellClicked.connect(self.component_table_click)
+        layout.addWidget(self.component_table)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

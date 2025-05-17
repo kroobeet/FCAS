@@ -842,6 +842,18 @@ class FranchiseApp(QMainWindow):
                 self.db_connection.rollback()
                 QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении типа устройства:\n{str(e)}")
 
+    def clear_device_type_form(self):
+        """Очистка формы типа устройства"""
+        self.device_type_name.clear()
+        self.device_type_description.clear()
+
+        if hasattr(self, 'current_device_type_id'):
+            del self.current_device_type_id
+
+        self.update_device_type_btn.setEnabled(False)
+        self.delete_device_type_btn.setEnabled(False)
+        self.add_device_type_btn.setEnabled(True)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

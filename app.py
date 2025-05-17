@@ -771,6 +771,35 @@ class FranchiseApp(QMainWindow):
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении типа устройства:\n{str(e)}")
 
+    def update_device_type(self):
+        """Обновление существующего типа устройства"""
+        if not hasattr(self, 'current_device_type_id'):
+            return
+
+        name = self.device_type_name.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Название типа обязательно!")
+            return
+
+        description = self.device_type_description.text().strip()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE device_type
+                    SET name = %s, description = %s
+                    WHERE device_type_id = %s
+                """, (name, description if description else None, self.current_device_type_id))
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", "Тип устройства успешно обновлен")
+                self.load_device_types()
+                self.clear_device_type_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении типа устройства:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

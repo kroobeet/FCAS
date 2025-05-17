@@ -1399,6 +1399,53 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке типов компонентов:\n{str(e)}")
 
+    def load_components(self):
+        """Загрузка списка компонентов из БД"""
+        device_id = self.component_device.currentData()
+        component_type_id = self.component_type.currentData()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                query = """
+                    SELECT c.component_id, d.name as device_name, 
+                           ct.name as component_type, c.model,
+                           c.installed_date, c.notes
+                    FROM component c
+                    JOIN device d ON c.device_id = d.device_id
+                    JOIN component_type ct ON c.component_type_id = ct.component_type_id
+                """
+                params = []
+
+                where_clauses = []
+                if device_id:
+                    where_clauses.append("c.device_id = %s")
+                    params.append(device_id)
+                if component_type_id:
+                    where_clauses.append("c.component_type_id = %s")
+                    params.append(component_type_id)
+
+                if where_clauses:
+                    query += " WHERE " + " AND ".join(where_clauses)
+
+                query += " ORDER BY c.component_id"
+
+                cursor.execute(query, params)
+                components = cursor.fetchall()
+
+                # Очищаем таблицу
+                self.component_table.setRowCount(0)
+
+                # Заполняем таблицу
+                for row_num, row_data in enumerate(components):
+                    self.component_table.insertRow(row_num)
+                    for col_num, data in enumerate(row_data):
+                        item = QTableWidgetItem(str(data) if data is not None else "")
+                        item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                        self.component_table.setItem(row_num, col_num, item)
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке компонентов:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

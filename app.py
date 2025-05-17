@@ -419,3 +419,60 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении франшизы:\n{str(e)}")
+
+    def delete_franchise(self):
+        """Удаление франшизы"""
+        if not hasattr(self, 'current_franchise_id'):
+            return
+
+        reply = QMessageBox.question(
+            self, 'Подтверждение',
+            'Вы уверены, что хотите удалить эту франшизу?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                with self.db_connection.cursor() as cursor:
+                    # Проверяем, есть ли дочерние франшизы
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM franchise 
+                        WHERE parent_id = %s
+                    """, (self.current_franchise_id,))
+                    child_count = cursor.fetchone()[0]
+
+                    if child_count > 0:
+                        QMessageBox.warning(
+                            self, "Ошибка",
+                            "Нельзя удалить франшизу, у которой есть дочерние франшизы!"
+                        )
+                        return
+
+                    # Проверяем, есть ли связанные локации
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM location 
+                        WHERE franchise_id = %s
+                    """, (self.current_franchise_id,))
+                    location_count = cursor.fetchone()[0]
+
+                    if location_count > 0:
+                        QMessageBox.warning(
+                            self, "Ошибка",
+                            "Нельзя удалить франшизу, у которой есть локации!"
+                        )
+                        return
+
+                    # Удаляем франшизу
+                    cursor.execute("""
+                        DELETE FROM franchise 
+                        WHERE franchise_id = %s
+                    """, (self.current_franchise_id,))
+                    self.db_connection.commit()
+
+                    QMessageBox.information(self, "Успех", "Франшиза успешно удалена")
+                    self.load_franchises()
+                    self.clear_franchise_form()
+
+            except psycopg2.Error as e:
+                self.db_connection.rollback()
+                QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении франшизы:\n{str(e)}")

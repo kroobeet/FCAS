@@ -382,3 +382,40 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении франшизы:\n{str(e)}")
+
+    def update_franchise(self):
+        """Обновление существующей франшизы"""
+        if not hasattr(self, 'current_franchise_id'):
+            return
+
+        name = self.franchise_name.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Название франшизы обязательно!")
+            return
+
+        parent_id = self.franchise_parent.currentData()
+        address = self.franchise_address.text().strip()
+        phone = self.franchise_phone.text().strip()
+        email = self.franchise_email.text().strip()
+        is_active = self.franchise_active.isChecked()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE franchise
+                    SET parent_id = %s, name = %s, address = %s,
+                        contact_phone = %s, email = %s, is_active = %s,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE franchise_id = %s
+                """, (parent_id, name, address if address else None,
+                      phone if phone else None, email if email else None,
+                      is_active, self.current_franchise_id))
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", "Франшиза успешно обновлена")
+                self.load_franchises()
+                self.clear_franchise_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении франшизы:\n{str(e)}")

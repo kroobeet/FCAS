@@ -1488,6 +1488,46 @@ class FranchiseApp(QMainWindow):
         self.delete_component_btn.setEnabled(True)
         self.add_component_btn.setEnabled(False)
 
+    def add_component(self):
+        """Добавление нового компонента"""
+        device_id = self.component_selected_device.currentData()
+        if not device_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать устройство!")
+            return
+
+        component_type_id = self.component_selected_type.currentData()
+        if not component_type_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать тип компонента!")
+            return
+
+        model = self.component_model.text().strip()
+        installed_date = self.component_installed_date.date().toString("yyyy-MM-dd")
+        notes = self.component_notes.text().strip()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO component (
+                        device_id, component_type_id, model,
+                        installed_date, notes
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    RETURNING component_id
+                """, (
+                    device_id, component_type_id, model if model else None,
+                    installed_date, notes if notes else None
+                ))
+                component_id = cursor.fetchone()[0]
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", f"Компонент успешно добавлен с ID: {component_id}")
+                self.load_components()
+                self.clear_component_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении компонента:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

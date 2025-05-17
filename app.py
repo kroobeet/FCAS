@@ -60,8 +60,7 @@ class FranchiseApp(QMainWindow):
         self.setup_component_tab()
 
         # Загружаем начальные данные
-        self.load_franchises()
-        self.load_locations()
+        self.load_initial_data()
 
     def connect_to_db(self):
         """Установка соединения с PostgreSQL"""

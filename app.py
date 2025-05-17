@@ -1597,6 +1597,21 @@ class FranchiseApp(QMainWindow):
                 self.db_connection.rollback()
                 QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении компонента:\n{str(e)}")
 
+    def clear_component_form(self):
+        """Очистка формы компонента"""
+        self.component_selected_device.setCurrentIndex(0)
+        self.component_selected_type.setCurrentIndex(0)
+        self.component_model.clear()
+        self.component_installed_date.setDate(QDate.currentDate())
+        self.component_notes.clear()
+
+        if hasattr(self, 'current_component_id'):
+            del self.current_component_id
+
+        self.update_component_btn.setEnabled(False)
+        self.delete_component_btn.setEnabled(False)
+        self.add_component_btn.setEnabled(True)
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

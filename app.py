@@ -200,3 +200,39 @@ class FranchiseApp(QMainWindow):
         self.location_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.location_table.cellClicked.connect(self.location_table_click)
         layout.addWidget(self.location_table)
+
+    def load_franchises(self):
+        """Загрузка списка франшиз из БД"""
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT f.franchise_id, f.name, p.name as parent_name,
+                           f.contact_phone, f.is_active
+                    FROM franchise f 
+                    LEFT JOIN franchise p ON f.parent_id = p.franchise_id
+                    ORDER BY f.franchise_id
+                """)
+                franchises = cursor.fetchall()
+
+                # Очищаем таблицу
+                self.franchise_table.setRowCount(0)
+
+                # Заполняем таблицу
+                for row_num, row_data in enumerate(franchises):
+                    self.franchise_table.insertRow(row_num)
+                    for col_num, data in enumerate(row_data):
+                        item = QTableWidgetItem(str(data) if data is not None else "")
+                        item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                        self.franchise_table.setItem(row_num, col_num, item)
+
+                # Обновляем комбобоксы
+                self.franchise_parent.clear()
+                self.franchise_parent.addItem("Нет родительской", None)
+                self.location_franchise.clear()
+
+                cursor.execute("SELECT franchise_id, name FROM franchise ORDER BY name")
+                for franchise_id, name in cursor.fetchall():
+                    self.franchise_parent.addItem(name, franchise_id)
+                    self.location_franchise.addItem(name, franchise_id)
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке франшиз:\n{str(e)}")

@@ -951,6 +951,36 @@ class FranchiseApp(QMainWindow):
         self.device_table.cellClicked.connect(self.device_table_click)
         layout.addWidget(self.device_table)
 
+    def load_devices(self):
+        """Загрузка списка устройств из БД"""
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT d.device_id, dt.name as device_type, f.name as franchise_name,
+                           l.name as location_name, d.inventory_number, d.name,
+                           d.status, d.purchase_price
+                    FROM device d
+                    JOIN device_type dt ON d.device_type_id = dt.device_type_id
+                    JOIN franchise f ON d.franchise_id = f.franchise_id
+                    LEFT JOIN location l ON d.location_id = l.location_id
+                    ORDER BY d.device_id
+                """)
+                devices = cursor.fetchall()
+
+                # Очищаем таблицу
+                self.device_table.setRowCount(0)
+
+                # Заполняем таблицу
+                for row_num, row_data in enumerate(devices):
+                    self.device_table.insertRow(row_num)
+                    for col_num, data in enumerate(row_data):
+                        item = QTableWidgetItem(str(data) if data is not None else "")
+                        item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                        self.device_table.setItem(row_num, col_num, item)
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке устройств:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

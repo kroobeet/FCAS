@@ -350,3 +350,35 @@ class FranchiseApp(QMainWindow):
         self.update_location_btn.setEnabled(True)
         self.delete_location_btn.setEnabled(True)
         self.add_location_btn.setEnabled(False)
+
+    def add_franchise(self):
+        """Добавление новой франшизы"""
+        name = self.franchise_name.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Название франшизы обязательно!")
+            return
+
+        parent_id = self.franchise_parent.currentData()
+        address = self.franchise_address.text().strip()
+        phone = self.franchise_phone.text().strip()
+        email = self.franchise_email.text().strip()
+        is_active = self.franchise_active.isChecked()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                INSERT INTO franchise (parent_id, name, address, contact_phone, email, is_active)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING franchise_id
+                """, (parent_id, name, address if address else None,
+                           phone if phone else None, email if email else None, is_active))
+                franchise_id = cursor.fetchone()[0]
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", f"Франшиза успешно добавлена с ID: {franchise_id}")
+                self.load_franchises()
+                self.clear_franchise_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении франшизы:\n{str(e)}")

@@ -527,3 +527,42 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении локации:\n{str(e)}")
+
+    def update_location(self):
+        """Обновление существующей локации"""
+        if not hasattr(self, 'current_location_id'):
+            return
+
+        franchise_id = self.location_franchise.currentData()
+        if not franchise_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать франшизу!")
+            return
+
+        name = self.location_name.text().strip()
+        if not name:
+            QMessageBox.warning(self, "Ошибка", "Название локации обязательно!")
+            return
+
+        address = self.location_address.text().strip()
+        room_number = self.location_room.text().strip()
+        is_active = self.location_active.isChecked()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE location
+                    SET franchise_id = %s, name = %s, address = %s,
+                        room_number = %s, is_active = %s
+                    WHERE location_id = %s
+                """, (franchise_id, name, address if address else None,
+                      room_number if room_number else None, is_active,
+                      self.current_location_id))
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", "Локация успешно обновлена")
+                self.load_locations()
+                self.clear_location_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении локации:\n{str(e)}")

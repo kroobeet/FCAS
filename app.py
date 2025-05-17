@@ -76,6 +76,16 @@ class FranchiseApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка подключения", f"Не удалось подключиться к БД:\n{str(e)}")
             sys.exit(1)
 
+    def load_initial_data(self):
+        """Загрузка всех начальных данных"""
+        self.load_franchises()
+        self.load_locations()
+        self.load_device_types()
+        self.load_devices()
+        self.load_device_history()
+        self.load_component_types()
+        self.load_components()
+
     def setup_franchise_tab(self):
         """Настройка вкладки франшиз"""
         layout = QVBoxLayout()

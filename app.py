@@ -131,3 +131,72 @@ class FranchiseApp(QMainWindow):
         self.franchise_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.franchise_table.cellClicked.connect(self.franchise_table_click)
         layout.addWidget(self.franchise_table)
+
+    def setup_location_tab(self):
+        """Настройка вкладки локаций"""
+        layout = QVBoxLayout()
+        self.location_tab.setLayout(layout)
+
+        # Форма для добавления/редактирования
+        form_layout = QHBoxLayout()
+        layout.addLayout(form_layout)
+
+        # Левая часть формы
+        left_form = QVBoxLayout()
+        form_layout.addLayout(left_form)
+
+        self.location_franchise = QComboBox()
+        left_form.addWidget(QLabel("Франшиза:"))
+        left_form.addWidget(self.location_franchise)
+
+        self.location_name = QLineEdit()
+        left_form.addWidget(QLabel("Название локации:"))
+        left_form.addWidget(self.location_name)
+
+        # Правая часть формы
+        right_form = QVBoxLayout()
+        form_layout.addLayout(right_form)
+
+        self.location_address = QLineEdit()
+        right_form.addWidget(QLabel("Адрес:"))
+        right_form.addWidget(self.location_address)
+
+        self.location_room = QLineEdit()
+        right_form.addWidget(QLabel("Номер помещения:"))
+        right_form.addWidget(self.location_room)
+
+        self.location_active = QCheckBox("Активна")
+        self.location_active.setChecked(True)
+        right_form.addWidget(self.location_active)
+
+        # Кнопки управления
+        buttons_layout = QHBoxLayout()
+        layout.addLayout(buttons_layout)
+
+        self.add_location_btn = QPushButton("Добавить")
+        self.add_location_btn.clicked.connect(self.add_location)
+        buttons_layout.addWidget(self.add_location_btn)
+
+        self.update_location_btn = QPushButton("Обновить")
+        self.update_location_btn.setEnabled(False)
+        self.update_location_btn.clicked.connect(self.update_location)
+        buttons_layout.addWidget(self.update_location_btn)
+
+        self.delete_location_btn = QPushButton("Удалить")
+        self.delete_location_btn.setEnabled(False)
+        self.delete_location_btn.clicked.connect(self.delete_location)
+        buttons_layout.addWidget(self.delete_location_btn)
+
+        self.clear_location_btn = QPushButton("Очистить")
+        self.clear_location_btn.clicked.connect(self.clear_location_form)
+
+        # Таблица с локациями
+        self.location_table = QTableWidget()
+        self.location_table.setColumnCount(5)
+        self.location_table.setHorizontalHeaderLabels(
+            ["ID", "Франшиза", "Название", "Адрес", "Активна"]
+        )
+        self.location_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.location_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.location_table.cellClicked.connect(self.location_table_click)
+        layout.addWidget(self.location_table)

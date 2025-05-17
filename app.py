@@ -482,6 +482,33 @@ class FranchiseApp(QMainWindow):
         self.delete_franchise_btn.setEnabled(False)
         self.add_franchise_btn.setEnabled(True)
 
+    def load_locations(self):
+        """Загрузка списка локаций из БД"""
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT l.location_id, f.name as franchise_name, 
+                           l.name, l.address, l.is_active
+                    FROM location l
+                    JOIN franchise f ON l.franchise_id = f.franchise_id
+                    ORDER BY l.location_id
+                """)
+                locations = cursor.fetchall()
+
+                # Очищаем таблицу
+                self.location_table.setRowCount(0)
+
+                # Заполняем таблицу
+                for row_num, row_data in enumerate(locations):
+                    self.location_table.insertRow(row_num)
+                    for col_num, data in enumerate(row_data):
+                        item = QTableWidgetItem(str(data) if data is not None else "")
+                        item.setFlags(item.flags() ^ Qt.ItemFlag.ItemIsEditable)
+                        self.location_table.setItem(row_num, col_num, item)
+
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке локаций:\n{str(e)}")
+
     def location_table_click(self, row, column):
         """Обработка клика по таблице локаций"""
         location_id = int(self.location_table.item(row, 0).text())

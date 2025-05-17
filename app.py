@@ -1528,6 +1528,47 @@ class FranchiseApp(QMainWindow):
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при добавлении компонента:\n{str(e)}")
 
+    def update_component(self):
+        """Обновление существующего компонента"""
+        if not hasattr(self, 'current_component_id'):
+            return
+
+        device_id = self.component_selected_device.currentData()
+        if not device_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать устройство!")
+            return
+
+        component_type_id = self.component_selected_type.currentData()
+        if not component_type_id:
+            QMessageBox.warning(self, "Ошибка", "Необходимо выбрать тип компонента!")
+            return
+
+        model = self.component_model.text().strip()
+        installed_date = self.component_installed_date.date().toString("yyyy-MM-dd")
+        notes = self.component_notes.text().strip()
+
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE component
+                    SET device_id = %s, component_type_id = %s, model = %s,
+                        installed_date = %s, notes = %s
+                    WHERE component_id = %s
+                """, (
+                    device_id, component_type_id, model if model else None,
+                    installed_date, notes if notes else None,
+                    self.current_component_id
+                ))
+                self.db_connection.commit()
+
+                QMessageBox.information(self, "Успех", "Компонент успешно обновлен")
+                self.load_components()
+                self.clear_component_form()
+
+        except psycopg2.Error as e:
+            self.db_connection.rollback()
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении компонента:\n{str(e)}")
+
     def closeEvent(self, event):
         """Обработка закрытия окна"""
         self.db_connection.close()

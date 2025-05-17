@@ -86,6 +86,7 @@ class FranchiseApp(QMainWindow):
         self.load_component_types()
         self.load_components()
 
+    # ===== Франшизы =====
     def setup_franchise_tab(self):
         """Настройка вкладки франшиз"""
         layout = QVBoxLayout()

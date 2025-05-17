@@ -264,3 +264,47 @@ class FranchiseApp(QMainWindow):
 
         except psycopg2.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке локаций:\n{str(e)}")
+
+    def franchise_table_click(self, row, column):
+        """Обработка клика по таблице франшиз"""
+        franchise_id = int(self.franchise_table.item(row, 0).text())
+        franchise_name = self.franchise_table.item(row, 1).text()
+        parent_name = self.franchise_table.item(row, 2).text()
+        phone = self.franchise_table.item(row, 3).text()
+        active = self.franchise_table.item(row, 4).text() == "True"
+
+        # Заполняем форму
+        self.current_franchise_id = franchise_id
+        self.franchise_name.setText(franchise_name)
+
+        # Устанавливаем родительскую франшизу
+        parent_index = 0 # По умолчанию "Нет родительской"
+        if parent_name:
+            for i in range(1, self.franchise_parent.count()):
+                if self.franchise_parent.itemText(i) == parent_name:
+                    parent_index = i
+                    break
+
+        self.franchise_parent.setCurrentIndex(parent_index)
+
+        self.franchise_phone.setText(phone)
+        self.franchise_active.setChecked(active)
+
+        # Получаем остальные данные из БД
+        try:
+            with self.db_connection.cursor() as cursor:
+                cursor.execute("""
+                SELECT address, email
+                FROM franchise
+                WHERE franchise_id = %s
+            """, (franchise_id,))
+                address, email = cursor.fetchone()
+                self.franchise_address.setText(address if address else "")
+                self.franchise_email.setText(email if email else "")
+        except psycopg2.Error as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке франшизы:\n{str(e)}")
+
+        # Активируем кнопки
+        self.update_franchise_btn.setEnabled(True)
+        self.delete_franchise_btn.setEnabled(True)
+        self.add_franchise_btn.setEnabled(False)

@@ -566,3 +566,31 @@ class FranchiseApp(QMainWindow):
         except psycopg2.Error as e:
             self.db_connection.rollback()
             QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении локации:\n{str(e)}")
+
+    def delete_location(self):
+        """Удаление локации"""
+        if not hasattr(self, 'current_location_id'):
+            return
+
+        reply = QMessageBox.question(
+            self, 'Подтверждение',
+            'Вы уверены, что хотите удалить эту локацию?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                with self.db_connection.cursor() as cursor:
+                    cursor.execute("""
+                        DELETE FROM location 
+                        WHERE location_id = %s
+                    """, (self.current_location_id,))
+                    self.db_connection.commit()
+
+                    QMessageBox.information(self, "Успех", "Локация успешно удалена")
+                    self.load_locations()
+                    self.clear_location_form()
+
+            except psycopg2.Error as e:
+                self.db_connection.rollback()
+                QMessageBox.critical(self, "Ошибка", f"Ошибка при удалении локации:\n{str(e)}")

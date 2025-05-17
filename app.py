@@ -466,6 +466,22 @@ class FranchiseApp(QMainWindow):
         self.delete_franchise_btn.setEnabled(True)
         self.add_franchise_btn.setEnabled(False)
 
+    def clear_franchise_form(self):
+        """Очистка формы франшизы"""
+        self.franchise_name.clear()
+        self.franchise_parent.setCurrentIndex(0)
+        self.franchise_address.clear()
+        self.franchise_phone.clear()
+        self.franchise_email.clear()
+        self.franchise_active.setChecked(True)
+
+        if hasattr(self, 'current_franchise_id'):
+            del self.current_franchise_id
+
+        self.update_franchise_btn.setEnabled(False)
+        self.delete_franchise_btn.setEnabled(False)
+        self.add_franchise_btn.setEnabled(True)
+
     def location_table_click(self, row, column):
         """Обработка клика по таблице локаций"""
         location_id = int(self.location_table.item(row, 0).text())

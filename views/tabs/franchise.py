@@ -11,7 +11,7 @@ from controllers.franchise import FranchiseController
 class FranchiseTab(QWidget):
     def __init__(self, db):
         super().__init__()
-        self.db = db,
+        self.db = db
         self.controller = FranchiseController(db, self)
         self.current_franchise_id = None
         self.init_ui()

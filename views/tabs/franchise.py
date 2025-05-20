@@ -153,7 +153,7 @@ class FranchiseTab(QWidget):
 
                 # Особое оформление для колонки "Активна"
                 if col_num == 4:
-                    item.setText("Да" if data == True else "Нет")
+                    item.setText("Да" if data is True else "Нет")
 
                 self.franchise_table.setItem(row_num, col_num, item)
 

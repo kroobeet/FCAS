@@ -8,7 +8,7 @@ CREATE TABLE device (
     device_id SERIAL PRIMARY KEY,
     device_type_id INTEGER NOT NULL REFERENCES device_type(device_type_id),
     franchise_id INTEGER NOT NULL REFERENCES franchise(franchise_id),
-    location_id INTEGER REFERENCES location(location_id),
+    location_id INTEGER NOT NULL REFERENCES location(location_id),
     inventory_number VARCHAR(50) UNIQUE,
     name VARCHAR(100),
     status VARCHAR(20) CHECK (status IN ('active', 'in_repair', 'decommissioned', 'lost')),

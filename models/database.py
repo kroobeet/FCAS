@@ -1,5 +1,5 @@
 import psycopg2
-from PyQt6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox  # Изменённая строка импорта
 import logging
 
 

@@ -44,6 +44,6 @@ class MainWindow(QMainWindow):
         super().closeEvent(event)
 
     def refresh_all_tabs(self):
-        """Обновляет данные во всех влкдаках"""
+        """Обновляет данные во всех вкладках"""
         self.franchise_tab.load_data()
         self.location_tab.load_data()

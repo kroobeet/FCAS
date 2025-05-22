@@ -1,8 +1,12 @@
 from models.franchise import FranchiseModel
+from PySide6.QtCore import Signal, QObject
 
 
-class FranchiseController:
+class FranchiseController(QObject):
+    data_changed = Signal()  # Сигнал об изменении данных
+
     def __init__(self, db, view):
+        super().__init__()
         self.model = FranchiseModel(db)
         self.view = view
 
@@ -45,8 +49,7 @@ class FranchiseController:
         if result:
             franchise_id = result[0][0]
             self.view.show_message("Успех", f"Франшиза успешно добавлена с ID: {franchise_id}")
-            self.load_franchises()
-            self.load_parent_franchises()
+            self.data_changed.emit()
             self.view.clear_form()
 
     def update_franchise(self):
@@ -75,8 +78,7 @@ class FranchiseController:
 
         if result:
             self.view.show_message("Успех", "Франшиза успешно обновлена")
-            self.load_franchises()
-            self.load_parent_franchises()
+            self.data_changed.emit()
             self.view.clear_form()
 
     def delete_franchise(self):
@@ -91,6 +93,5 @@ class FranchiseController:
             self.view.show_message("Ошибка", "Нельзя удалить франшизу, у которой есть локации!", True)
         elif result:
             self.view.show_message("Успех", "Франшиза успешно удалена")
-            self.load_franchises()
-            self.load_parent_franchises()
+            self.data_changed.emit()
             self.view.clear_form()

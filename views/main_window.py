@@ -29,6 +29,14 @@ class MainWindow(QMainWindow):
         # Загрузка данных
         self.franchise_tab.load_data()
 
+        # Подключаем сигналы
+        self.franchise_tab.controller.data_changed.connect(self.refresh_all_tabs)
+
     def closeEvent(self, event):
         self.db.close()
         super().closeEvent(event)
+
+    def refresh_all_tabs(self):
+        """Обновляет данные во всех влкдаках"""
+        self.franchise_tab.load_data()
+        self.location_tab.load_data()

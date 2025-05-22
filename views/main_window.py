@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 from models.database import Database
 from views.tabs.franchise import FranchiseTab
+from views.tabs.location import LocationTab
 
 
 class MainWindow(QMainWindow):
@@ -23,14 +24,20 @@ class MainWindow(QMainWindow):
         self.franchise_tab = FranchiseTab(self.db)
         self.tabs.addTab(self.franchise_tab, "Франшизы")
 
+        # Добавление вкладки локаций
+        self.location_tab = LocationTab(self.db)
+        self.tabs.addTab(self.location_tab, "Локации")
+
         # Добавление статус бара
         self.statusBar().showMessage("Готово", 3000)
 
         # Загрузка данных
         self.franchise_tab.load_data()
+        self.location_tab.load_data()
 
         # Подключаем сигналы
         self.franchise_tab.controller.data_changed.connect(self.refresh_all_tabs)
+        self.location_tab.controller.data_changed.connect(self.refresh_all_tabs)
 
     def closeEvent(self, event):
         self.db.close()

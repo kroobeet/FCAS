@@ -292,3 +292,77 @@ QToolTip {
     border-radius: 3px;
     padding: 3px;
 }
+
+/* Стили для QDateEdit */
+QDateEdit {
+    background-color: #353535;
+    border: 1px solid #404040;
+    border-radius: 4px;
+    padding: 6px;
+    color: #e0e0e0;
+    selection-background-color: #2d5d83;
+    selection-color: white;
+}
+
+QDateEdit::drop-down {
+    subcontrol-origin: border;
+    width: 20px;
+    border-left: 1px solid #404040;
+    background: #404040;
+}
+
+QDateEdit::down-arrow {
+    width: 8px;
+    height: 8px;
+}
+
+/* Стили для календаря */
+QCalendarWidget {
+    background-color: #353535;
+    border: 1px solid #404040;
+}
+
+QCalendarWidget QWidget {
+    alternate-background-color: #353535;
+}
+
+QCalendarWidget QToolButton {
+    background-color: #404040;
+    color: #e0e0e0;
+    font-size: 12px;
+    icon-size: 20px;
+    padding: 5px;
+}
+
+QCalendarWidget QMenu {
+    background-color: #404040;
+    color: #e0e0e0;
+    border: 1px solid #505050;
+}
+
+QCalendarWidget QSpinBox {
+    background-color: #404040;
+    color: #e0e0e0;
+    selection-background-color: #2d5d83;
+    selection-color: white;
+}
+
+QCalendarWidget QAbstractItemView:enabled {
+    background-color: #353535;
+    color: #e0e0e0;
+    selection-background-color: #2d5d83;
+    selection-color: white;
+}
+
+/* Заголовок календаря */
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: #404040;
+    border-bottom: 1px solid #505050;
+}
+
+/* Кнопки месяца/года */
+QCalendarWidget QToolButton#qt_calendar_monthbutton,
+QCalendarWidget QToolButton#qt_calendar_yearbutton {
+    background-color: transparent;
+    color: #e0e0e0;
+}
